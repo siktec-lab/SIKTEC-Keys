@@ -19,7 +19,7 @@ You can install the library via one of the following:
 2. Download the repositories as a ZIP file and install it on the Arduino IDE by:
 	`Sketch -> Include library -> Add .ZIP Library.`
 3. Download the library and include it in your project folder - Than you can Include it:
-	`#include `{path to}\SIKTEC_Keys.h`
+	`#include "{path to}\SIKTEC_Keys.h"`
 
 ## Example included:
 The example included with this library demonstrates how to declare and initialize the keypad, control the sensitivity assign callbacks and use the `KeyEvent` object which is created for each keypress.
@@ -29,7 +29,7 @@ The code is well documented and should be easy to build upon and extend the func
 ## Initialization of SIKTEC_Keys
 This is the full constructor which should be used if you change the shield pins. This way you can
 use other pins with different boards.
-```c_cpp
+```cpp
 SIKtec::SIKTEC_Keys keypad = SIKtec::SIKTEC_Keys(
 	true,       // combinations support enabled
 	latchPin,   // latch pin number - default is A2
