@@ -1,11 +1,10 @@
-//**************************************************************//
-//  Name    : shiftIn Example 1.3                               //
-//  Author  : Carlyn Maw                                        //
-//  Date    : 25 Jan, 2007                                      //
-//  Version : 1.0                                               //
-//  Notes   : Code for using a CD4021B Shift Register       //
-//          :                                                   //
-//****************************************************************
+/******************************************************************************/
+// Created by: Shlomo Hassid.
+// Release Version : 1.0.2
+// Creation Date: 2021-06-18
+// Copyright 2021, SIKTEC / SIKDEV.
+// Source: https://github.com/siktec-lab/SIKTEC-Keys
+/******************************************************************************/
 
 #include <Arduino.h>
 #include "SIKTEC_Keys.h"

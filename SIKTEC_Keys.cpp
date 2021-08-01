@@ -1,4 +1,11 @@
 
+/******************************************************************************/
+// Created by: Shlomo Hassid.
+// Release Version : 1.0.2
+// Creation Date: 2021-06-18
+// Copyright 2021, SIKTEC / SIKDEV.
+// Source: https://github.com/siktec-lab/SIKTEC-Keys
+/******************************************************************************/
 #include "SIKTEC_Keys.h"
 
 namespace SIKtec {// Namespace SIKtec
