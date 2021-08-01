@@ -34,7 +34,7 @@ void SIKTEC_Keys::setPinModes() {
     pinMode(this->pins.clock,   OUTPUT);
     pinMode(this->pins.data,    INPUT);
     pinMode(this->pins.inter,   INPUT);
-    digitalWrite(2, LOW);
+    digitalWrite(this->pins.inter, LOW);
     attachInterrupt(digitalPinToInterrupt(this->pins.inter), SIKTEC_Keys::isr, RISING);
 }
 void SIKTEC_Keys::isr() {
@@ -74,7 +74,7 @@ KeyEvent SIKTEC_Keys::read() {
     this->readShift();
     KeyEvent key(this->buffer);
     //Add keyCodes:
-    for (int8_t n = 0; n <= 7; n++) {
+    for (int8_t n = 0; n <= SIKETC_KEYS_KEYS_ATTACHED; n++) {
         if (this->buffer & (1 << n) ) {
             key.add(SIKTEC_Keys::keyCodes[n]);
             if (!this->multi) break;
@@ -104,7 +104,7 @@ void SIKTEC_Keys::readShift() {
     digitalWrite(this->pins.latch, INPUT); //set it to 0 to transmit data serially
     pinMode(this->pins.clock, OUTPUT);
     pinMode(this->pins.data,  INPUT);
-    for (int8_t i = 7; i >= 0; i--) {
+    for (int8_t i = SIKETC_KEYS_KEYS_ATTACHED; i >= 0; i--) {
         //set clock as input
         digitalWrite(this->pins.clock, INPUT);
         delayMicroseconds(0.2);

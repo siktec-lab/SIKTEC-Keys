@@ -49,6 +49,7 @@ void setup() {
  ***************************************************************************/
 void cb_any_key(SIKtec::KeyEvent event)
 {
+    Serial.println("--------------------------------------------------");
     Serial.print("Any key Callback, Event - [");
     Serial.print(event.str());
     Serial.print("::");

@@ -47,6 +47,8 @@ namespace SIKtec { //Namespace SIKtec
 #define SIKETC_KEYS_REGISTER_BITS 8  // which is the shift registers bits size
 #define SIKETC_KEYS_MAX_CALLBACKS 15  // which is the shift registers bits size
 #define SIKETC_KEYS_DEBOUNCE_DELAY 250  // which is the shift registers bits size
+#define SIKETC_KEYS_DEFAULT_SENSITIVITY 30  // which is the shift registers bits size
+#define SIKETC_KEYS_DEFAULT_ACTIVE true  // which is the shift registers bits size
 
 /***************************************************************************/
 /**** Types to be used *****************************************************/
@@ -176,9 +178,9 @@ class SIKTEC_Keys {
         };
         callback_pair callbacks[SIKETC_KEYS_MAX_CALLBACKS];
         uint8_t registered = 0;
-        bool active = true;
+        bool active = SIKETC_KEYS_DEFAULT_ACTIVE;
         bool multi;
-        uint8_t _sensitivity = 30; /* 1-50 */
+        uint8_t _sensitivity = SIKETC_KEYS_DEFAULT_SENSITIVITY; /* 1-50 */
     public:
         volatile int32_t lastDebounceTime;               // Stores the last time in milli seconds a tick happend
         volatile inline static int32_t debounceDelay;    // Defines the debounce delay to be use    
