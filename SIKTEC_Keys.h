@@ -3,7 +3,7 @@
 // Release Version : 1.0.2
 // Creation Date: 2021-06-18
 // Copyright 2021, SIKTEC / SIKDEV.
-// Source: 
+// Source: https://github.com/siktec-lab/SIKTEC-Keys
 /******************************************************************************/
 #ifndef SIKTEC_KEYS_H
 #define SIKTEC_KEYS_H
@@ -39,28 +39,43 @@ namespace SIKtec { //Namespace SIKtec
 /**** DEFAULTS *************************************************************/
 /***************************************************************************/
 
-#define SIKETC_KEYS_LATCH_PIN A2
-#define SIKETC_KEYS_DATA_PIN A0
-#define SIKETC_KEYS_CLOCK_PIN A1
-#define SIKETC_KEYS_INTER_PIN 2
-#define SIKETC_KEYS_KEYS_ATTACHED 7  // physical keys
-#define SIKETC_KEYS_REGISTER_BITS 8  // which is the shift registers bits size
-#define SIKETC_KEYS_MAX_CALLBACKS 15  // which is the shift registers bits size
-#define SIKETC_KEYS_DEBOUNCE_DELAY 250  // which is the shift registers bits size
-#define SIKETC_KEYS_DEFAULT_SENSITIVITY 30  // which is the shift registers bits size
-#define SIKETC_KEYS_DEFAULT_ACTIVE true  // which is the shift registers bits size
+#define SIKETC_KEYS_LATCH_PIN A2            //default latch pin used by the shield.
+#define SIKETC_KEYS_DATA_PIN A0             //default data pin used by the shield.
+#define SIKETC_KEYS_CLOCK_PIN A1            //default clock pin used by the shield.
+#define SIKETC_KEYS_INTER_PIN 2             //default interupt pin used by the shield.
+#define SIKETC_KEYS_KEYS_ATTACHED 7         // number of physical keys - shield has 7
+#define SIKETC_KEYS_REGISTER_BITS 8         // the number of pins (bits) that are used on the shift register
+#define SIKETC_KEYS_MAX_CALLBACKS 15        // the size of the container which will store callbacks
+#define SIKETC_KEYS_DEBOUNCE_DELAY 250      // button debounce delay.
+#define SIKETC_KEYS_DEFAULT_SENSITIVITY 30  // sensitivity for combination key pressed.
+#define SIKETC_KEYS_DEFAULT_ACTIVE true     // active or disable callback by default.
 
 /***************************************************************************/
 /**** Types to be used *****************************************************/
 /***************************************************************************/
-/* 
-* RotaryRange: Struct for defining counter range.
+
+
+/*!
+* KeyEvent
+* ----------------------------
+* @method KeyEvent: the object that is created on each keypress and holds the base logic.
+* KeyEvent.multi => boolean, true if multiple keys were pressed otherwise false 
+* KeyEvent.none  => boolean, true only if any key was pressed otherwise false 
+* KeyEvent.count() => size_t, return the number of keys in the combination
+* KeyEvent  [< > >= <=] size_t, logical comparison to number of keys pressed
+* KeyEvent.is(char | char*) => boolean, check if the keyevent is a specific key or combination
+* KeyEvent == (char | char*) => boolean, same as KeyEvent.is.
+* KeyEvent.has(char | char*) => boolean, check if the keyevent includes a key or a combination
+* KeyEvent.get(uint8_t i) => char, returns a specific key in the combination
+* KeyEvent.str(i) => char*, return the key or combination as a string
+* KeyEvent.add(char) => void, add a key to the combination.
+* KeyEvent.merge(KeyEvent &source) => merge two KeyEvent objects.
 */
 struct KeyEvent {
     private:
-        uint8_t _ki = 0;     //counts how many keys detected
-        char _keys[SIKETC_KEYS_KEYS_ATTACHED]; // Key pressed -> mapped
-        char _str[SIKETC_KEYS_KEYS_ATTACHED + 1]; // Key pressed -> mapped will hold a null terminated for string like char array
+        uint8_t _ki = 0;                            // internally counts how many keys detected
+        char _keys[SIKETC_KEYS_KEYS_ATTACHED];      // Key pressed -> mapped
+        char _str[SIKETC_KEYS_KEYS_ATTACHED + 1];   // Key pressed -> mapped will hold a null terminated for string char array
 
     public:
         unsigned char bits; // Raw reading bits
@@ -144,104 +159,170 @@ struct KeyEvent {
         }
 };
 
-
-
+/*!
+ * callback_pair: internal key pair for registering user defined callbacks 
+ * ----------------------------
+ * callback_pair.key => uint32_t, the unique id of the key combination 
+ * callback_pair.(*cb)(KeyEvent) => the function pointer.
+ */
 struct callback_pair {
     uint32_t key;
     void (*cb)(KeyEvent);
     callback_pair(): key(0), cb(nullptr) {}
     callback_pair(uint32_t k, void (*_cb)(KeyEvent)): key(k), cb(_cb) {}
 };
+
 /***************************************************************************/
-/**** SikRot CLASS *********************************************************/
+/**** SIKTEC_Keys CLASS ****************************************************/
 /***************************************************************************/
 
 class SIKTEC_Keys {
     
     private:
+        
+        // Internal struct of the pins used:
         struct {
             uint8_t latch; 
             uint8_t data; 
             uint8_t clock; 
             uint8_t inter; 
         } pins;
-        unsigned char buffer = 0b00000000; // Holds the shift register bits.
+        
+        // Holds the shift register bits.
+        unsigned char buffer = 0b00000000; 
+        
+        // keyCodes as chars, index corresponds to the bit position.
         inline static const char keyCodes[] = {
-            'u', 
-            'l', 
-            'd', 
-            'r', 
-            'm', 
-            'L', 
-            'R', 
-            'x'
+            'u','l','d','r','m','L','R','x'
         };
+        
+        // Container to hold user defined callbacks
         callback_pair callbacks[SIKETC_KEYS_MAX_CALLBACKS];
+        
+        // internally counts callbacks.
         uint8_t registered = 0;
+        
+        // internal activation flag.
         bool active = SIKETC_KEYS_DEFAULT_ACTIVE;
+        
+        // internal multi key combination flag.
         bool multi;
+        
+        // stores the sensitivity level.
         uint8_t _sensitivity = SIKETC_KEYS_DEFAULT_SENSITIVITY; /* 1-50 */
+    
     public:
-        volatile int32_t lastDebounceTime;               // Stores the last time in milli seconds a tick happend
-        volatile inline static int32_t debounceDelay;    // Defines the debounce delay to be use    
+        
+        // Stores the last time in milli seconds a keypress triggered interupt. 
+        volatile int32_t lastDebounceTime;
+        
+        // Defines the debounce delay to be use
+        volatile inline static int32_t debounceDelay;
+        
         //static reflectedMethod reflect;
         static SIKTEC_Keys* instance;
         SIKTEC_Keys(bool allowMulti);
 	    SIKTEC_Keys(bool allowMulti, uint8_t latchPin, uint8_t dataPin, uint8_t clockPin, uint8_t interPin);
-        /*
-        * enable: enables the keypad callbacks
-        * ----------------------------
-        *   returns: void 
+        
+        /*!
+         * enable
+         * ----------------------------
+         * @brief enables the keypad callbacks execution
+         * @return void 
         */
         void enable();
-        /*
-        * disable: disables the keypad callbacks
-        * ----------------------------
-        *   returns: void 
+
+        /*!
+         * disable
+         * ----------------------------
+         * @brief disables the keypad callbacks execution
+         * @return void 
         */
         void disable();
-
+        
+        /*!
+         * sensitivity
+         * ----------------------------
+         * @brief sets teh sensitivity level
+         * @param uint8_t s
+         * @return void 
+        */
         void sensitivity(uint8_t s);
-        /*
-        * read: reads keypad and return a KeyEvent object
-        * ----------------------------
-        *   returns: KeyEvent 
+
+        /*!
+         * read
+         * ----------------------------
+         * @brief reads keypad and return a KeyEvent object
+         * @return KeyEvent 
         */
         KeyEvent read();
 
+        /*!
+         * on
+         * ----------------------------
+         * @brief attach a callback to s key or combination
+         * @param char* key
+         * @param void (*)(KeyEvent) cb
+         * @return void 
+        */
         void on(const char* key, void (*cb)(KeyEvent));
 
+        /*!
+         * invoke
+         * ----------------------------
+         * @brief invoke a callback who is attached to a specific key or combination
+         * @param char* key
+         * @param KeyEvent &event
+         * @return bool - true if invoked 
+        */
         bool invoke(const char* key, KeyEvent &event);
-        /*
-        * ntDelay: nonblocking delay:
+
+        /*!
+        * ntDelay
         * ----------------------------
-        *   0.1s == 100000 micro seconds
-        *   uint8_t t => number of 0.1 seconds to delay
-        *   returns: void 
+        * @brief nonblocking delay - 0.1s == 100000 micro seconds
+        * @param uint8_t t - number of 0.1 seconds to delay
+        * @returns void 
         */
         inline static void ntDelay(uint8_t t) {
             for (byte i = 0; i < t; i++) delayMicroseconds(100000);
         }
+
     private:
-        /*
+
+        /*!
         * setPinModes: sets pin modes which were set by the constructor
         * ----------------------------
-        *   returns: void 
+        * @brief sets pin modes which were set by the constructor
+        * @returns void 
         */
         void setPinModes();
-        /*
-        * read_shift: fills the buffer with shift register bits
+        
+        /*!
+        * readShift:
         * ----------------------------
-        *   returns: void 
+        * @brief fills the buffer with shift register bits
+        * @returns void 
         */
         void readShift();
-        /*
-        * hashKey: helper to keep key combination sorted
+        
+        /*!
+        * hashKey: 
         * ----------------------------
-        *   returns: uint32_t 
+        * @brief returns a unique id give a sequence of chars independent of position
+        * @param char key - the characters
+        * @overload char*
+        * @returns uint32_t - the id
         */
         uint32_t hashKey(const char key);
         uint32_t hashKey(const char* key);
+
+        /*!
+        * [static] isr: 
+        * ----------------------------
+        * @brief internal interupt function used to call the defined callbacks and read the keys
+        * @returns void
+        */
         static void isr();
 
 };
