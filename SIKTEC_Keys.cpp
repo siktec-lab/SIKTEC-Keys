@@ -43,20 +43,26 @@ void SIKTEC_Keys::isr() {
         SIKtec::SIKTEC_Keys::instance->lastDebounceTime = millis();
         //First get the triggering key:
         SIKtec::KeyEvent key = SIKTEC_Keys::instance->read();
-        if (key > 0) {
+        if (SIKTEC_Keys::instance->active && key > 0) {
             //Delay to pick all keys:
             if (SIKtec::SIKTEC_Keys::instance->multi) {
-                SIKTEC_Keys::ntDelay(SIKtec::SIKTEC_Keys::instance->sensitivity); // wait for other keys
+                SIKTEC_Keys::ntDelay(SIKtec::SIKTEC_Keys::instance->_sensitivity); // wait for other keys
                 SIKtec::KeyEvent additional_keys = SIKTEC_Keys::instance->read(); // get additional keys.
                 key.merge(additional_keys); //merge them
             }
             //invoke all first:
             SIKtec::SIKTEC_Keys::instance->invoke("any", key);
             //handle callbacks
-            SIKtec::SIKTEC_Keys::instance->invoke(key.str(), key);
+            if (!SIKtec::SIKTEC_Keys::instance->invoke(key.str(), key)) {
+                //handle default callbacks
+                SIKtec::SIKTEC_Keys::instance->invoke("def", key);
+            }
         }
     }
     sei();
+}
+void SIKTEC_Keys::sensitivity(uint8_t s) {
+    this->_sensitivity = s < 1 ? 1 : s;
 }
 void SIKTEC_Keys::enable() {
 	this->active = true;
@@ -82,12 +88,14 @@ void SIKTEC_Keys::on(const char* key, void (*cb)(KeyEvent)) {
         this->callbacks[this->registered++] = callback_pair(numKey, cb);
     }
 }
-void SIKTEC_Keys::invoke(const char* key, KeyEvent &event) {
+bool SIKTEC_Keys::invoke(const char* key, KeyEvent &event) {
     uint32_t numKey = this->hashKey(key);
     for (uint8_t i = 0; i < SIKETC_KEYS_MAX_CALLBACKS; i++)
-        if (this->callbacks[i].key == numKey)
-            return (this->callbacks[i].cb)(event);
-
+        if (this->callbacks[i].key == numKey) {
+            (this->callbacks[i].cb)(event);
+            return true;
+        }
+    return false;
 }
 void SIKTEC_Keys::readShift() {
     this->buffer = 0b00000000;

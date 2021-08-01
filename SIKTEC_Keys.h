@@ -178,7 +178,7 @@ class SIKTEC_Keys {
         uint8_t registered = 0;
         bool active = true;
         bool multi;
-        uint8_t sensitivity = 30; /* 1-50 */
+        uint8_t _sensitivity = 30; /* 1-50 */
     public:
         volatile int32_t lastDebounceTime;               // Stores the last time in milli seconds a tick happend
         volatile inline static int32_t debounceDelay;    // Defines the debounce delay to be use    
@@ -199,6 +199,7 @@ class SIKTEC_Keys {
         */
         void disable();
 
+        void sensitivity(uint8_t s);
         /*
         * read: reads keypad and return a KeyEvent object
         * ----------------------------
@@ -208,7 +209,7 @@ class SIKTEC_Keys {
 
         void on(const char* key, void (*cb)(KeyEvent));
 
-        void invoke(const char* key, KeyEvent &event);
+        bool invoke(const char* key, KeyEvent &event);
         /*
         * ntDelay: nonblocking delay:
         * ----------------------------

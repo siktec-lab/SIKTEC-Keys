@@ -27,8 +27,12 @@ void setup() {
     Serial.begin(9600);
     while (!Serial) { ; } // wait for serial
 
+    //Keypad sensitivity setting [1-50 default 30]:
+    keypad.sensitivity(30);
+
     //Register you callbacks:
     keypad.on("any", &cb_any_key);
+    keypad.on("def", &cb_default);
     keypad.on("m",   &cb_middle);
     keypad.on("u",   &cb_up);
     keypad.on("d",   &cb_down);
@@ -53,6 +57,10 @@ void cb_any_key(SIKtec::KeyEvent event)
     Serial.print(event.none ? "true" : "false");
     Serial.print(" - multi? ");
     Serial.println(event.multi ? "true" : "false");
+}
+void cb_default(SIKtec::KeyEvent event)
+{
+    Serial.println("Callback default fired");
 }
 void cb_middle(SIKtec::KeyEvent event)
 {
