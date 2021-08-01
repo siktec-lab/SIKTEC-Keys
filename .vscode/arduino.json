@@ -1,0 +1,6 @@
+{
+    "sketch": "SIKTEC_KeyPad.ino",
+    "board": "arduino:avr:leonardo",
+    "port": "COM8",
+    "programmer": "arduino:arduinoisp"
+}
