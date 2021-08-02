@@ -58,7 +58,7 @@ namespace SIKtec { //Namespace SIKtec
 /*!
 * KeyEvent
 * ----------------------------
-* @method KeyEvent: the object that is created on each keypress and holds the base logic.
+* @brief KeyEvent: the object that is created on each keypress and holds the base logic.
 * KeyEvent.multi => boolean, true if multiple keys were pressed otherwise false 
 * KeyEvent.none  => boolean, true only if any key was pressed otherwise false 
 * KeyEvent.count() => size_t, return the number of keys in the combination
@@ -154,7 +154,7 @@ struct KeyEvent {
             return this->_ki < size;
         }
         //Constructors:
-        KeyEvent(unsigned char b, bool m = false, bool n = true) : bits(b), multi(m), none(n) {
+        KeyEvent(unsigned char b = 0b00000000, bool m = false, bool n = true) : bits(b), multi(m), none(n) {
 
         }
 };
@@ -203,13 +203,13 @@ class SIKTEC_Keys {
         uint8_t registered = 0;
         
         // internal activation flag.
-        bool active = SIKETC_KEYS_DEFAULT_ACTIVE;
+        volatile bool active = SIKETC_KEYS_DEFAULT_ACTIVE;
         
         // internal multi key combination flag.
-        bool multi;
+        volatile bool multi;
         
         // stores the sensitivity level.
-        uint8_t _sensitivity = SIKETC_KEYS_DEFAULT_SENSITIVITY; /* 1-50 */
+        volatile uint8_t _sensitivity = SIKETC_KEYS_DEFAULT_SENSITIVITY; /* 1-50 */
     
     public:
         
