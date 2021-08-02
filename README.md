@@ -56,6 +56,7 @@ SIKtec::SIKTEC_Keys keypad = SIKtec::SIKTEC_Keys(true /* combinations support en
 
 ## All the key codes:
 By default the shield has 7 keys - Keys are mapped to chars by the library;
+
 | Code | Button              | More info |
 |:----:|:--------------------|------------|
 | 'u'  | Direction UP        |            |
@@ -65,6 +66,7 @@ By default the shield has 7 keys - Keys are mapped to chars by the library;
 | 'm'  | Direction MIDDLE    |            |
 | 'L'  | Button TOP LEFT     | this button may also be the reset button (jumper on the back of the board) |
 | 'R'  | Button TOP RIGHT    |            |
+
 Any key combination may be used ex: ` 'ud', 'mR', 'LRm' `. Note that the key order are not important and maps to the same combination.
 
 ## Controling the sensitivity 
